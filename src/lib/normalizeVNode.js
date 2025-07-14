@@ -4,21 +4,17 @@
  * @returns {string|Object|Array} 정규화된 Virtual DOM 노드
  */
 export function normalizeVNode(vNode) {
-  // null, undefined, boolean 값은 빈 문자열로 변환
+  // 1. vNode가 null, undefined 또는 boolean 타입일 경우 빈 문자열을 반환합니다.
   if (vNode == null || typeof vNode === "boolean") {
     return "";
   }
 
-  // 숫자는 문자열로 변환
-  if (typeof vNode === "number") {
+  // 2. vNode가 문자열 또는 숫자일 경우 문자열로 변환하여 반환합니다.
+  if (typeof vNode === "string" || typeof vNode === "number") {
     return String(vNode);
   }
 
-  // 문자열은 그대로 반환
-  if (typeof vNode === "string") {
-    return vNode;
-  }
-
+  // 3. vNode의 타입이 함수일 경우 해당 함수를 호출하여 반환된 결과를 재귀적으로 표준화합니다.
   // 함수형 컴포넌트 처리
   if (vNode && typeof vNode === "object" && typeof vNode.type === "function") {
     const component = vNode.type;
@@ -36,9 +32,9 @@ export function normalizeVNode(vNode) {
     return normalizeVNode(result);
   }
 
-  // 배열인 경우 각 요소를 정규화하고 falsy 값 제거
+  // 배열인 경우 각 요소를 정규화하고 null/undefined 값 제거
   if (Array.isArray(vNode)) {
-    return vNode.map(normalizeVNode).filter((v) => v !== "");
+    return vNode.map(normalizeVNode).filter((v) => v != null);
   }
 
   // 일반 vNode인 경우 children을 정규화
@@ -46,13 +42,13 @@ export function normalizeVNode(vNode) {
     return {
       ...vNode,
       children: Array.isArray(vNode.children)
-        ? vNode.children.map(normalizeVNode).filter((v) => v !== "")
+        ? vNode.children.map(normalizeVNode).filter((v) => v != null)
         : vNode.children != null
           ? normalizeVNode(vNode.children)
           : [],
     };
   }
 
-  // 그 외의 경우 그대로 반환
+  // 그 외의 경우, vNode의 자식 요소들을 재귀적으로 표준화하고, null 또는 undefined 값을 필터링하여 반환합니다.
   return vNode;
 }

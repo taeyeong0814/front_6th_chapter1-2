@@ -9,9 +9,14 @@ export function createVNode(type, props, ...children) {
   // 배열을 평탄화 (map으로 생성된 중첩 배열 처리)
   const flattenedChildren = children.flat(Infinity);
 
+  // falsy 값들(null, undefined, false, true) 필터링
+  const filteredChildren = flattenedChildren.filter(
+    (child) => child !== null && child !== undefined && child !== false && child !== true,
+  );
+
   return {
     type,
     props: props === undefined ? {} : props, // undefined만 빈 객체로, null은 null 유지
-    children: flattenedChildren,
+    children: filteredChildren,
   };
 }
