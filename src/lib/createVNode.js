@@ -1,7 +1,17 @@
+/**
+ * JSX 문법을 Virtual DOM 객체로 변환
+ * @param {string|Function} type - HTML 태그명 또는 컴포넌트 함수
+ * @param {Object|null} props - 엘리먼트 속성들
+ * @param {...any} children - 자식 노드들
+ * @returns {Object} Virtual DOM 노드 객체
+ */
 export function createVNode(type, props, ...children) {
+  // 배열을 평탄화 (map으로 생성된 중첩 배열 처리)
+  const flattenedChildren = children.flat(Infinity);
+
   return {
     type,
-    props: props || {},
-    children: children.length === 1 ? children[0] : children,
+    props: props === undefined ? {} : props, // undefined만 빈 객체로, null은 null 유지
+    children: flattenedChildren,
   };
 }
