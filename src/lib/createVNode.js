@@ -7,9 +7,22 @@
  */
 export function createVNode(type, props, ...children) {
   // 배열을 평탄화 (map으로 생성된 중첩 배열 처리)
+  // Infinity 라는 내장 상수를 사용하여 깊이 제한 없이 평탄화
+  // Infinity는 항상 true로 평가되므로, 모든 깊이의 배열을 평탄화할 수 있다.
+  // 그래서 children.flat(Infinity)로 모든 깊이의 배열을 평탄화 작업을 하는 것이다.
   const flattenedChildren = children.flat(Infinity);
 
   // falsy 값들(null, undefined, false, true) 필터링
+  // JSX 에서 조건부 렌더링 결과로 들어올 수 있는 값들을 처리하기 위함 이다.
+  // 예를 들어 isLoading이 false일 때 null이 들어올 수 있는 경우가 있다.
+  // 이 경우 null은 Virtual DOM에 포함되지 않도록 필터링한다.
+  // 이 필터링은 최종적으로 Virtual DOM에 포함될 자식 요소들을 정리하는 역할을 한다.
+  // null, undefined, false, true는 Virtual DOM에 포함되지 않도록 필터링한다.
+  // true는 JSX에서 조건부 렌더링 결과로 들어올 수 있지만, Virtual DOM에는 포함되지 않도록 한다.
+  // false는 조건부 렌더링 결과로 들어올 수 있지만, Virtual DOM에는 포함되지 않도록 한다.
+  // 이 필터링은 최종적으로 Virtual DOM에 포함될 자식 요소들을 정리하는 역할을 한다.
+  // 예를 들어 isLoading이 false일 때 null이 들어올 수 있는 경우가 있다.
+  // 이 경우 null은 Virtual DOM에 포함되지 않도록 필터링한다.
   const filteredChildren = flattenedChildren.filter(
     (child) => child !== null && child !== undefined && child !== false && child !== true,
   );
