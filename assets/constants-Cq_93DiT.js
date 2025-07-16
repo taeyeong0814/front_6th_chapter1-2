@@ -1,0 +1,1 @@
+const e=`/front_6th_chapter1-2/`;export{e as b};
