@@ -69,9 +69,6 @@ jobs:
         with:
           version: latest
 
-      - run: node -v
-      - run: pnpm -v
-
       - run: |
           pnpm install
           npx playwright install --with-deps
