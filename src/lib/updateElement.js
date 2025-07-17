@@ -26,7 +26,10 @@ function updateAttribute(target, key, value, oldValue) {
     updateEvent(target, key, value, oldValue);
   } else if (key === "className") {
     target.setAttribute("class", value);
-  } else if (["checked", "selected", "disabled", "readOnly"].includes(key)) {
+  } else if (key === "checked" || key === "selected") {
+    target[key] = value;
+    if (!value) target.removeAttribute(key);
+  } else if (key === "disabled" || key === "readOnly") {
     setBooleanAttribute(target, key, value);
   } else if (typeof value === "boolean") {
     setBooleanAttribute(target, key, value);
