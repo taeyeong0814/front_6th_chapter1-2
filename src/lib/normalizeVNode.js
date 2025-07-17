@@ -28,8 +28,10 @@ export function normalizeVNode(vNode) {
     const props = { ...vNode.props };
 
     // children을 props에 추가 (React의 children prop)
-    if (vNode.children && vNode.children.length > 0) {
-      props.children = Array.isArray(vNode.children) ? vNode.children : [vNode.children];
+    if (Array.isArray(vNode.children) && vNode.children.length > 0) {
+      props.children = vNode.children;
+    } else if (vNode.children != null) {
+      props.children = [vNode.children];
     }
 
     // 컴포넌트 함수 실행
