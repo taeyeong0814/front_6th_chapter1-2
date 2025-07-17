@@ -11,103 +11,41 @@ const eventMap = new WeakMap();
  */
 
 // type 으로 묶어서 공통함수로 빼서 처리 해보자.
-
-export function setupEventListeners(root) {
-  // 클릭 이벤트 위임
-  root.addEventListener("click", (e) => {
-    // 이벤트 버블링을 고려하여 상위 요소들도 확인
-    let target = e.target;
-    while (target && target !== root) {
-      const handlers = eventMap.get(target);
-      if (handlers && handlers.click) {
-        handlers.click(e);
-        return; // 핸들러를 찾으면 더 이상 상위로 올라가지 않음
-      }
-      target = target.parentElement;
-    }
-  });
-
-  // 인풋 이벤트 위임
-  root.addEventListener("input", (e) => {
-    let target = e.target;
-    while (target && target !== root) {
-      const handlers = eventMap.get(target);
-      if (handlers && handlers.input) {
-        handlers.input(e);
-        return;
-      }
-      target = target.parentElement;
-    }
-  });
-
-  // 체인지 이벤트 위임
-  root.addEventListener("change", (e) => {
-    let target = e.target;
-    while (target && target !== root) {
-      const handlers = eventMap.get(target);
-      if (handlers && handlers.change) {
-        handlers.change(e);
-        return;
-      }
-      target = target.parentElement;
-    }
-  });
-
-  // 마우스오버 이벤트 위임
-  root.addEventListener("mouseover", (e) => {
-    let target = e.target;
-    while (target && target !== root) {
-      const handlers = eventMap.get(target);
-      if (handlers && handlers.mouseover) {
-        handlers.mouseover(e);
-        return;
-      }
-      target = target.parentElement;
-    }
-  });
-
-  // 포커스 이벤트 위임
+// -> 이렇게 공통 함수로 묶어 보았다.
+function delegate(root, eventType, handlerKey, options) {
   root.addEventListener(
-    "focus",
+    eventType,
     (e) => {
+      // 이벤트 버블링을 고려하여 상위 요소들도 확인
       let target = e.target;
       while (target && target !== root) {
         const handlers = eventMap.get(target);
-        if (handlers && handlers.focus) {
-          handlers.focus(e);
-          return;
+        if (handlers && handlers[handlerKey]) {
+          handlers[handlerKey](e);
+          return; // 핸들러를 찾으면 더 이상 상위로 올라가지 않음
         }
         target = target.parentElement;
       }
     },
-    true,
-  ); // capture 단계에서 처리 (focus는 bubble되지 않음)
+    options,
+  );
+}
 
+export function setupEventListeners(root) {
+  // 클릭 이벤트 위임
+  delegate(root, "click", "click");
+  // 인풋 이벤트 위임
+  delegate(root, "input", "input");
+  // 체인지 이벤트 위임
+  delegate(root, "change", "change");
+  // 마우스오버 이벤트 위임
+  delegate(root, "mouseover", "mouseover");
+  // 포커스 이벤트 위임
+  delegate(root, "focus", "focus", true); // capture 옵션 필요
   // 키다운 이벤트 위임
-  root.addEventListener("keydown", (e) => {
-    let target = e.target;
-    while (target && target !== root) {
-      const handlers = eventMap.get(target);
-      if (handlers && handlers.keydown) {
-        handlers.keydown(e);
-        return;
-      }
-      target = target.parentElement;
-    }
-  });
-
+  delegate(root, "keydown", "keydown");
   // 서브밋 이벤트 위임
-  root.addEventListener("submit", (e) => {
-    let target = e.target;
-    while (target && target !== root) {
-      const handlers = eventMap.get(target);
-      if (handlers && handlers.submit) {
-        handlers.submit(e);
-        return;
-      }
-      target = target.parentElement;
-    }
-  });
+  delegate(root, "submit", "submit");
 }
 
 /**
