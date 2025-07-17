@@ -1,10 +1,11 @@
 /**
- * JSX 문법을 Virtual DOM 객체로 변환
+ * JSX 문법을 Virtual DOM 객체로 변환 - parameters 설명 추가
  * @param {string|Function} type - HTML 태그명 또는 컴포넌트 함수
  * @param {Object|null} props - 엘리먼트 속성들
  * @param {...any} children - 자식 노드들
  * @returns {Object} Virtual DOM 노드 객체
  */
+
 export function createVNode(type, props, ...children) {
   // 배열을 평탄화 (map으로 생성된 중첩 배열 처리)
   // Infinity 라는 내장 상수를 사용하여 깊이 제한 없이 평탄화
@@ -27,6 +28,7 @@ export function createVNode(type, props, ...children) {
     (child) => child !== null && child !== undefined && child !== false && child !== true,
   );
 
+  // jsx문법을 Virtual DOM에 만들기 위해 객체화 시킨 값을 return 한.
   return {
     type,
     props: props === undefined ? {} : props, // undefined만 빈 객체로, null은 null 유지
