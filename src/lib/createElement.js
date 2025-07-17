@@ -9,49 +9,46 @@ import { addEvent } from "./eventManager";
 // 이 파일은 정규화된 Virtual DOM 객체를 실제 브라우저의 DOM 요소로 변환하는 역할을 합니다.
 
 // 이 함수는 Virtual DOM의 속성(props)을 실제 DOM 요소에 적용하는 역할을 합니다.
+// 기존은 if 문으로 처리했지만, key에 따라 분기하여 switch 문으로 처리하는 방식으로 변경 했습니다.
 function updateAttributes($el, props) {
   if (!props) return;
-
   Object.entries(props).forEach(([key, value]) => {
-    // 이벤트 핸들러 처리
+    // 1. 이벤트 핸들러 처리 (onClick 등)
+    // → key가 'on'으로 시작하고 값이 함수인 경우, 이벤트 리스너로 등록
     if (key.startsWith("on") && typeof value === "function") {
-      const eventType = key.slice(2).toLowerCase();
-      addEvent($el, eventType, value);
+      addEvent($el, key.slice(2).toLowerCase(), value);
       return;
     }
-
-    // className을 class로 변환
-    if (key === "className") {
-      $el.setAttribute("class", value);
-      return;
+    switch (key) {
+      // 2. className → class 속성으로 변환
+      // → React 스타일의 className을 실제 DOM의 class로 변환
+      case "className":
+        $el.setAttribute("class", value);
+        break;
+      // 3. checked, selected → property로만 설정 (attribute는 사용하지 않음)
+      // → input, option 등에서 checked/selected는 property로만 관리
+      case "checked":
+      case "selected":
+        $el[key] = value;
+        break;
+      // 4. disabled, readOnly → property와 attribute 모두 설정
+      // → disabled/readOnly는 property와 attribute를 모두 동기화
+      case "disabled":
+      case "readOnly":
+        $el[key] = value;
+        if (value) $el.setAttribute(key, "");
+        break;
+      // 5. 그 외 boolean 속성 → true일 때만 attribute 추가
+      // → 기타 boolean 속성은 true일 때만 attribute를 추가
+      default:
+        if (typeof value === "boolean") {
+          if (value) $el.setAttribute(key, "");
+        } else {
+          // 6. 일반 속성은 attribute로 설정
+          // → 나머지 속성은 모두 attribute로 추가
+          $el.setAttribute(key, value);
+        }
     }
-
-    // 불리언 속성 처리 (property로 설정)
-    if (["checked", "selected"].includes(key)) {
-      $el[key] = value;
-      // checked와 selected는 DOM attribute로 설정하지 않음 (property만 사용)
-      return;
-    }
-
-    // 불리언 속성 처리 (DOM attribute도 설정)
-    if (["disabled", "readOnly"].includes(key)) {
-      $el[key] = value;
-      if (value) {
-        $el.setAttribute(key, "");
-      }
-      return;
-    }
-
-    // 불리언 속성 처리 (일반 boolean)
-    if (typeof value === "boolean") {
-      if (value) {
-        $el.setAttribute(key, "");
-      }
-      return;
-    }
-
-    // 일반 속성 설정
-    $el.setAttribute(key, value);
   });
 }
 
