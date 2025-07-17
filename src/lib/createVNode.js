@@ -7,11 +7,16 @@
  */
 
 export function createVNode(type, props, ...children) {
+  // 실제 배포를 하고 페이지를 접속하니까 Uncaught TypeError: Cannot read properties of undefined (reading 'length') 가 발생했다.
+  // 그래서 children이 undefined이거나 배열이 아닐 때도 항상 배열로 변환하는 로직을 추가했다.
+  // children이 undefined이거나 배열이 아닐 때도 항상 배열로 변환
+  const normalizedChildren = Array.isArray(children) ? children : children === undefined ? [] : [children];
+
   // 배열을 평탄화 (map으로 생성된 중첩 배열 처리)
   // Infinity 라는 내장 상수를 사용하여 깊이 제한 없이 평탄화
   // Infinity는 항상 true로 평가되므로, 모든 깊이의 배열을 평탄화할 수 있다.
-  // 그래서 children.flat(Infinity)로 모든 깊이의 배열을 평탄화 작업을 하는 것이다.
-  const flattenedChildren = children.flat(Infinity);
+  // 그래서 normalizedChildren.flat(Infinity)로 모든 깊이의 배열을 평탄화 작업을 하는 것이다.
+  const flattenedChildren = normalizedChildren.flat(Infinity);
 
   // falsy 값들(null, undefined, false, true) 필터링
   // JSX 에서 조건부 렌더링 결과로 들어올 수 있는 값들을 처리하기 위함 이다.
