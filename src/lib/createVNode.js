@@ -26,9 +26,6 @@ export function createVNode(type, props, ...children) {
   // null, undefined, false, true는 Virtual DOM에 포함되지 않도록 필터링한다.
   // true는 JSX에서 조건부 렌더링 결과로 들어올 수 있지만, Virtual DOM에는 포함되지 않도록 한다.
   // false는 조건부 렌더링 결과로 들어올 수 있지만, Virtual DOM에는 포함되지 않도록 한다.
-  // 이 필터링은 최종적으로 Virtual DOM에 포함될 자식 요소들을 정리하는 역할을 한다.
-  // 예를 들어 isLoading이 false일 때 null이 들어올 수 있는 경우가 있다.
-  // 이 경우 null은 Virtual DOM에 포함되지 않도록 필터링한다.
   const filteredChildren = flattenedChildren.filter(
     (child) => child !== null && child !== undefined && child !== false && child !== true,
   );
