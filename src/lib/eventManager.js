@@ -9,64 +9,103 @@ const eventMap = new WeakMap();
  * 루트 요소에 이벤트 위임 리스너를 설정
  * @param {HTMLElement} root - 이벤트 위임을 설정할 루트 요소
  */
+
+// type 으로 묶어서 공통함수로 빼서 처리 해보자.
+
 export function setupEventListeners(root) {
   // 클릭 이벤트 위임
   root.addEventListener("click", (e) => {
-    const handlers = eventMap.get(e.target);
-    if (handlers && handlers.click) {
-      handlers.click(e);
+    // 이벤트 버블링을 고려하여 상위 요소들도 확인
+    let target = e.target;
+    while (target && target !== root) {
+      const handlers = eventMap.get(target);
+      if (handlers && handlers.click) {
+        handlers.click(e);
+        return; // 핸들러를 찾으면 더 이상 상위로 올라가지 않음
+      }
+      target = target.parentElement;
     }
   });
 
   // 인풋 이벤트 위임
   root.addEventListener("input", (e) => {
-    const handlers = eventMap.get(e.target);
-    if (handlers && handlers.input) {
-      handlers.input(e);
+    let target = e.target;
+    while (target && target !== root) {
+      const handlers = eventMap.get(target);
+      if (handlers && handlers.input) {
+        handlers.input(e);
+        return;
+      }
+      target = target.parentElement;
     }
   });
 
   // 체인지 이벤트 위임
   root.addEventListener("change", (e) => {
-    const handlers = eventMap.get(e.target);
-    if (handlers && handlers.change) {
-      handlers.change(e);
+    let target = e.target;
+    while (target && target !== root) {
+      const handlers = eventMap.get(target);
+      if (handlers && handlers.change) {
+        handlers.change(e);
+        return;
+      }
+      target = target.parentElement;
     }
   });
 
-  // 마우스오버 이벤트 위임 (테스트에서 사용)
+  // 마우스오버 이벤트 위임
   root.addEventListener("mouseover", (e) => {
-    const handlers = eventMap.get(e.target);
-    if (handlers && handlers.mouseover) {
-      handlers.mouseover(e);
+    let target = e.target;
+    while (target && target !== root) {
+      const handlers = eventMap.get(target);
+      if (handlers && handlers.mouseover) {
+        handlers.mouseover(e);
+        return;
+      }
+      target = target.parentElement;
     }
   });
 
-  // 포커스 이벤트 위임 (테스트에서 사용)
+  // 포커스 이벤트 위임
   root.addEventListener(
     "focus",
     (e) => {
-      const handlers = eventMap.get(e.target);
-      if (handlers && handlers.focus) {
-        handlers.focus(e);
+      let target = e.target;
+      while (target && target !== root) {
+        const handlers = eventMap.get(target);
+        if (handlers && handlers.focus) {
+          handlers.focus(e);
+          return;
+        }
+        target = target.parentElement;
       }
     },
     true,
   ); // capture 단계에서 처리 (focus는 bubble되지 않음)
 
-  // 키다운 이벤트 위임 (테스트에서 사용)
+  // 키다운 이벤트 위임
   root.addEventListener("keydown", (e) => {
-    const handlers = eventMap.get(e.target);
-    if (handlers && handlers.keydown) {
-      handlers.keydown(e);
+    let target = e.target;
+    while (target && target !== root) {
+      const handlers = eventMap.get(target);
+      if (handlers && handlers.keydown) {
+        handlers.keydown(e);
+        return;
+      }
+      target = target.parentElement;
     }
   });
 
   // 서브밋 이벤트 위임
   root.addEventListener("submit", (e) => {
-    const handlers = eventMap.get(e.target);
-    if (handlers && handlers.submit) {
-      handlers.submit(e);
+    let target = e.target;
+    while (target && target !== root) {
+      const handlers = eventMap.get(target);
+      if (handlers && handlers.submit) {
+        handlers.submit(e);
+        return;
+      }
+      target = target.parentElement;
     }
   });
 }

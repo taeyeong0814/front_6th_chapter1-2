@@ -1,6 +1,7 @@
 import { addEvent, removeEvent } from "./eventManager";
 import { createElement } from "./createElement.js";
 
+// 이렇게 하면 노가다 코드이다. 조금 더 클린하게 가능하다.
 function updateAttributes(target, originNewProps, originOldProps) {
   // 기존 속성들 제거
   if (originOldProps) {
@@ -15,6 +16,10 @@ function updateAttributes(target, originNewProps, originOldProps) {
         else if (key !== "children") {
           if (key === "className") {
             target.removeAttribute("class");
+          } else if (["checked", "selected", "disabled", "readOnly"].includes(key)) {
+            // Boolean 속성은 property로 false 설정
+            target[key] = false;
+            target.removeAttribute(key);
           } else {
             target.removeAttribute(key);
           }
@@ -41,7 +46,21 @@ function updateAttributes(target, originNewProps, originOldProps) {
         else if (key === "className") {
           target.setAttribute("class", value);
         }
-        // 불리언 속성 처리
+        // 불리언 속성 처리 (property로 설정)
+        else if (["checked", "selected"].includes(key)) {
+          target[key] = value;
+          // checked와 selected는 DOM attribute로 설정하지 않음 (property만 사용)
+        }
+        // 불리언 속성 처리 (DOM attribute도 설정)
+        else if (["disabled", "readOnly"].includes(key)) {
+          target[key] = value;
+          if (value) {
+            target.setAttribute(key, "");
+          } else {
+            target.removeAttribute(key);
+          }
+        }
+        // 불리언 속성 처리 (일반 boolean)
         else if (typeof value === "boolean") {
           if (value) {
             target.setAttribute(key, "");
@@ -93,13 +112,25 @@ export function updateElement(parentElement, newNode, oldNode, index = 0) {
     updateAttributes(element, newNode.props, oldNode.props);
 
     // 자식 요소들 재귀적 업데이트
-    const maxLength = Math.max(
-      newNode.children ? newNode.children.length : 0,
-      oldNode.children ? oldNode.children.length : 0,
-    );
+    const newChildren = newNode.children || [];
+    const oldChildren = oldNode.children || [];
 
-    for (let i = 0; i < maxLength; i++) {
-      updateElement(element, newNode.children && newNode.children[i], oldNode.children && oldNode.children[i], i);
+    // 먼저 공통 인덱스 범위에 대해 업데이트
+    for (let i = 0; i < Math.min(newChildren.length, oldChildren.length); i++) {
+      updateElement(element, newChildren[i], oldChildren[i], i);
+    }
+
+    // 새로운 자식들 추가
+    for (let i = oldChildren.length; i < newChildren.length; i++) {
+      element.appendChild(createElement(newChildren[i]));
+    }
+
+    // 초과하는 기존 자식들 제거 (역순으로)
+    for (let i = oldChildren.length - 1; i >= newChildren.length; i--) {
+      const childToRemove = element.childNodes[i];
+      if (childToRemove) {
+        element.removeChild(childToRemove);
+      }
     }
   }
 }
